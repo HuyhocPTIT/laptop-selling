@@ -1,5 +1,6 @@
 package com.huy.laptopselling.controller;
 
+import com.huy.laptopselling.dto.ProductRequestDTO;
 import com.huy.laptopselling.dto.ProductResponseDTO;
 import com.huy.laptopselling.entity.Product;
 import com.huy.laptopselling.exception.ResourceNotFoundException;
@@ -29,9 +30,9 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody Product product){
-        Product savedProduct = productService.save(product);
-        return ResponseEntity.ok(savedProduct);
+    public ResponseEntity<ProductResponseDTO> createProduct(@RequestBody ProductRequestDTO productRequestDTO){
+        Product savedProduct = productService.createProduct(productRequestDTO);
+        return ResponseEntity.ok(productService.convertToResponseDTO(savedProduct));
     }
 
     @DeleteMapping("/{id}")

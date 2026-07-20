@@ -2,8 +2,12 @@ package com.huy.laptopselling.service;
 
 import com.huy.laptopselling.dto.ProductRequestDTO;
 import com.huy.laptopselling.dto.ProductResponseDTO;
+import com.huy.laptopselling.entity.Brand;
+import com.huy.laptopselling.entity.Category;
 import com.huy.laptopselling.entity.Product;
 import com.huy.laptopselling.exception.ResourceNotFoundException;
+import com.huy.laptopselling.repository.BrandRepository;
+import com.huy.laptopselling.repository.CategoryRepository;
 import com.huy.laptopselling.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,6 +20,12 @@ import java.util.List;
 public class ProductService {
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private BrandRepository brandRepository;
 
     public List<Product> getAllProducts() {
         return productRepository.findAll();
@@ -94,6 +104,19 @@ public class ProductService {
         product.setBasePrice(dto.getBasePrice());
         product.setStockQuantity(dto.getStockQuantity());
         product.setThumbnailUrl(dto.getThumbnailUrl());
+
+        if (dto.getCategoryId() != null) {
+            Category category = categoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + dto.getCategoryId()));
+            product.setCategory(category);
+        }
+
+        if (dto.getBrandId() != null) {
+            Brand brand = brandRepository.findById(dto.getBrandId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Brand not found with id: " + dto.getBrandId()));
+            product.setBrand(brand);
+        }
+
         return productRepository.save(product);
     }
 }
