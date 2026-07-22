@@ -27,16 +27,8 @@ public class ProductService {
     @Autowired
     private BrandRepository brandRepository;
 
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
-    }
-
     public Product getProductById(Long id) {
         return productRepository.findById(id).orElse(null);
-    }
-
-    public Product save(Product product) {
-        return productRepository.save(product);
     }
 
     public void deleteProduct(Long id) {
@@ -46,28 +38,31 @@ public class ProductService {
         productRepository.deleteById(id);
     }
 
-    public Product updateProduct(Long id, Product product){
-        return productRepository.findById(id).map(existingProduct -> {
-            if (product.getName() != null) {
-                existingProduct.setName(product.getName());
-            }
-            if (product.getDescription() != null){
-                existingProduct.setDescription(product.getDescription());
-            }
-            if (product.getStatus() != null){
-                existingProduct.setStatus(product.getStatus());
-            }
-            if (product.getBasePrice() != null){
-                existingProduct.setBasePrice(product.getBasePrice());
-            }
-            if (product.getStockQuantity() != null){
-                existingProduct.setStockQuantity(product.getStockQuantity());
-            }
-            if (product.getThumbnailUrl() != null){
-                existingProduct.setThumbnailUrl(product.getThumbnailUrl());
-            }
-            return productRepository.save(existingProduct);
-        }).orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+    public ProductResponseDTO updateProduct(Long id, ProductRequestDTO dto) {
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+
+        if (dto.getName() != null) existingProduct.setName(dto.getName());
+        if (dto.getDescription() != null) existingProduct.setDescription(dto.getDescription());
+        if (dto.getStatus() != null) existingProduct.setStatus(dto.getStatus());
+        if (dto.getBasePrice() != null) existingProduct.setBasePrice(dto.getBasePrice());
+        if (dto.getStockQuantity() != null) existingProduct.setStockQuantity(dto.getStockQuantity());
+        if (dto.getThumbnailUrl() != null) existingProduct.setThumbnailUrl(dto.getThumbnailUrl());
+
+        if (dto.getCategoryId() != null) {
+            Category category = categoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + dto.getCategoryId()));
+            existingProduct.setCategory(category);
+        }
+
+        if (dto.getBrandId() != null) {
+            Brand brand = brandRepository.findById(dto.getBrandId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Brand not found with id: " + dto.getBrandId()));
+            existingProduct.setBrand(brand);
+        }
+
+        Product updatedProduct = productRepository.save(existingProduct);
+        return convertToResponseDTO(updatedProduct);
     }
 
     public Page<Product> getProduct(String name, Pageable pageable){
