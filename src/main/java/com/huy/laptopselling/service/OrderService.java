@@ -7,6 +7,7 @@ import com.huy.laptopselling.entity.OrderDetail;
 import com.huy.laptopselling.entity.Product;
 import com.huy.laptopselling.entity.User;
 import com.huy.laptopselling.exception.BadRequestException;
+import com.huy.laptopselling.exception.ResourceNotFoundException;
 import com.huy.laptopselling.repository.OrderDetailRepository;
 import com.huy.laptopselling.repository.OrderRepository;
 import com.huy.laptopselling.repository.ProductRepository;
@@ -35,7 +36,7 @@ public class OrderService {
     public Order createOrder(OrderRequestDTO dto) {
         // Kiem tra User
         User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + dto.getUserId()));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + dto.getUserId()));
 
         Order order = new Order();
         order.setUser(user);
@@ -51,7 +52,7 @@ public class OrderService {
         // Duyet qua tung sp trong don
         for (OrderItemRequestDTO item : dto.getItems()){
             Product product = productRepository.findById(item.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product not found with id: " + item.getProductId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + item.getProductId()));
 
             // Ktra ton kho
             if (product.getStockQuantity() < item.getQuantity()) {
